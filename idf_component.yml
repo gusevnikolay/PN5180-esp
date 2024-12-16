@@ -1,0 +1,5 @@
+version: "7.8.2"
+description: Embedded PN5180 library
+url: https://github.com/cesanta/mongoose-esp-idf
+dependencies:
+  idf: ">=4.4"
