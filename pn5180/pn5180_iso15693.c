@@ -172,7 +172,7 @@ pn5180_iso15693_error_code_t pn5180_iso15693_new_password_ICODE_SLIX2(uint8_t *n
 
 pn5180_iso15693_error_code_t pn5180_iso15693_issue_command(uint8_t *cmd, uint8_t cmdLen, uint8_t **resultPtr) 
 {
-	pn5180_send_data(cmd, cmdLen, 0);
+	pn5180_send_data(cmd, cmdLen, 0, 0);
 	pn5180_delay(10);
 	uint32_t status = pn5180_get_IRQ_status();
 	if (0 == (status & PN5180_RX_SOF_DET_IRQ_STAT)) {
@@ -183,15 +183,15 @@ pn5180_iso15693_error_code_t pn5180_iso15693_issue_command(uint8_t *cmd, uint8_t
 		status = pn5180_get_IRQ_status();
 	}
 	uint32_t rxStatus;
-	pn5180_read_register(PN5180_RX_STATUS, &rxStatus);
+	pn5180_read_register(PN5180_RX_STATUS, &rxStatus,0);
 	uint16_t len = (uint16_t)(rxStatus & 0x000001ff);
-	*resultPtr = pn5180_read_data(len, 0);
+	*resultPtr = pn5180_read_data(len, 0, 0);
 	if (0L == *resultPtr) {
 		return PN5180_ISO15693_ERR_UNKNOWN_ERROR;
 	}
 	uint32_t irqStatus = pn5180_get_IRQ_status();
 	if (0 == (PN5180_RX_SOF_DET_IRQ_STAT & irqStatus)) { 
-		pn5180_clear_IRQ_status(PN5180_TX_IRQ_STAT | PN5180_IDLE_IRQ_STAT);
+		pn5180_clear_IRQ_status(PN5180_TX_IRQ_STAT | PN5180_IDLE_IRQ_STAT, 0);
 		return PN5180_ISO15693_ERR_NO_CARD;
 	}
 	uint8_t responseFlags = (*resultPtr)[0];
@@ -205,16 +205,16 @@ pn5180_iso15693_error_code_t pn5180_iso15693_issue_command(uint8_t *cmd, uint8_t
 			return (pn5180_iso15693_error_code_t)errorCode;
 		}
 	}
-	pn5180_clear_IRQ_status(PN5180_RX_SOF_DET_IRQ_STAT | PN5180_IDLE_IRQ_STAT | PN5180_TX_IRQ_STAT | PN5180_RX_IRQ_STAT);
+	pn5180_clear_IRQ_status(PN5180_RX_SOF_DET_IRQ_STAT | PN5180_IDLE_IRQ_STAT | PN5180_TX_IRQ_STAT | PN5180_RX_IRQ_STAT, 0);
 	return PN5180_ISO15693_ERR_OK;
 }
 
 bool pn5180_iso15693_setup_RF() 
 {
-	if(!pn5180_load_RF_config(0x0d, 0x8d)) return false;
+	if(!pn5180_load_RF_config(0x0d, 0x8d, 0)) return false;
 	if(!pn5180_set_RF_on()) return false;
-	pn5180_write_register_with_AND_mask(PN5180_SYSTEM_CONFIG, 0xfffffff8); 
-	pn5180_write_register_with_OR_mask(PN5180_SYSTEM_CONFIG, 0x00000003);  
+	pn5180_write_register_with_AND_mask(PN5180_SYSTEM_CONFIG, 0xfffffff8,0); 
+	pn5180_write_register_with_OR_mask(PN5180_SYSTEM_CONFIG, 0x00000003,0);  
 	return true;
 }
 
